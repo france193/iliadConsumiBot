@@ -34,6 +34,7 @@ async function botOnConsumi(msg) {
         await Utils.checkRequest(id, functionName, "GET_CONSUMI");
     } catch (e) {
         Utils.consoleLog("ERROR", functionName, e);
+        await bot.sendMessage(id, "Errore, premi di nuovo: /consumi", {replyMarkup: 'hide'});
     }
 }
 
@@ -97,6 +98,7 @@ async function botOnConsumiAfterReceivingData(msg) {
         });
     } catch (e) {
         Utils.consoleLog("ERROR", functionName, e);
+        await bot.sendMessage(id, "Errore, premi di nuovo: /consumi", {replyMarkup: 'hide'});
     }
 }
 

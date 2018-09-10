@@ -63,7 +63,7 @@ async function checkRequest(id, functionName, request) {
         case "GET_CONSUMI":
             let message = "Per sapere i tuoi consumi mandami il tuo ID iliad e la password del tuo account con uno " +
                 "spazio in mezzo.\n" +
-                "In questo modo: <ID_utente> <password>";
+                "In questo modo: ID password";
 
             await bot.sendMessage(id, message, {
                 ask: 'get_consumi',
