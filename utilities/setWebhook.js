@@ -24,9 +24,11 @@ const client = clients.createJsonClient({
 let object;
 
 if (settings_json.telegram.webhook.isActive) {
+	console.log("webHook must me activated!");
+
     object = {
-        url: 'https://www.france193.com',
-        certificate: './settings/cert.pem'
+        url: 'https://95.216.159.202',
+        certificate: '../settings/cert.pem'
     };
 } else {
     object = {
@@ -36,6 +38,7 @@ if (settings_json.telegram.webhook.isActive) {
 
 client.post('https://api.telegram.org/bot' + settings_json.telegram.token + '/setWebhook', object, function (err, req, res, data) {
     console.log('%d -> %j', res.statusCode, res.headers);
+    console.log("Activated!");
     printJSON(data);
 });
 

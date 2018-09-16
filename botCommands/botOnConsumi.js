@@ -89,10 +89,10 @@ async function botOnConsumiAfterReceivingData(msg) {
                         //console.log("Data: " + body);
                         await retrieveData(id, body);
                     } else {
-                        console.log('Codice PUK non disponibile');
+                        console.log('Error1');
                     }
                 } catch (exeption) {
-                    console.log("Error");
+                    console.log("Error2");
                 }
             });
         });
@@ -176,12 +176,14 @@ async function retrieveData(id, body) {
         return e.trim().length > 0;
     });
 
+    //➡️
+
     let results_data2 = "<b>iliad - i tuoi consumi</b>\n" +
-        "\n ➡️ \t📞" + data_store.iliad[1][0] + " / infiniti" +
-        "\n ➡️ ✉️ : " + data_store.iliad[2][0] + " / infiniti" +
-        "\n ➡️ 📩 : " + data_store.iliad[4][0] + " / infiniti" +
-        "\n ➡️ 🌐 Dati consumati  (🇮🇹): " + data_store.iliad[3][0] +
-        "\n ➡️ 🌐 Dati consumati  (🇪🇺): " + euData[0] + " / 2GB";
+        "\n 📞" + data_store.iliad[1][0] + " / ∞" +
+        "\n ✉️ : " + data_store.iliad[2][0] + " / ∞" +
+        "\n 📩 : " + data_store.iliad[4][0] + " / ∞" +
+        "\n 🌐 Dati consumati  (🇮🇹): " + data_store.iliad[3][0] +
+        "\n 🌐 Dati consumati  (🇪🇺): " + euData[0] + " / 2GB";
 
     await bot.sendMessage(id, results_data2, {parseMode: 'html'});
 }

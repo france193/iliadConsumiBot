@@ -39,6 +39,7 @@ async function botOnText(msg) {
     let user = msg.from.first_name + " " + msg.from.last_name + " (" + msg.from.username + ")";
 
     if (DEBUG) {
-        Utils.consoleLog("TEST", functionName, "[" + command + " - " + chat_type + "] - \"" + msg.text + "\" from: " + user + " " + id);
+        //Utils.consoleLog("TEST", functionName, "[" + command + " - " + chat_type + "] - \"" + msg.text + "\" from: " + user + " " + id);
+        Utils.consoleLog("TEST", functionName, "[" + command + " - " + chat_type + "] - from: " + user + " " + id);
     }
 }
