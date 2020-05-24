@@ -4,7 +4,10 @@
 const Telegraf = require('telegraf');
 const request = require('request');
 const cheerio = require('cheerio');
-const result = dotenv.config({ path: './.env'});
+const dotenv = require('dotenv');
+
+/** dotenv init **/
+const result = dotenv.config({path: './.env'});
 
 if (result.error) {
 	throw result.error;
@@ -19,11 +22,11 @@ const functionName = require('./v2_common').functionName;
 /** import classes **/
 
 /** constants **/
-const TELEGRAM_API_TOKEN = process.env.TELEGRAM_API_TOKEN;
+const TELEGRAM_API_TOKEN = String(process.env.TELEGRAM_API_TOKEN);
 const ILIAD_BASE_URL = 'https://www.iliad.it/account/';
-const TELEGRAM_ADMIN_ID = process.env.TELEGRAM_ADMIN_ID;
-const ILIAD_ADMIN_ID = process.env.ILIAD_ADMIN_ID;
-const ILIAD_ADMIN_PASSWORD = process.env.TELEGRAM_ADMIN_ID;
+const TELEGRAM_ADMIN_ID = Number(process.env.TELEGRAM_ADMIN_ID);
+const ILIAD_ADMIN_ID = String(process.env.ILIAD_ADMIN_ID);
+const ILIAD_ADMIN_PASSWORD = String(process.env.ILIAD_ADMIN_PASSWORD);
 
 const ILIAD_OPTION_URL = {
 	login: 'login',
@@ -76,8 +79,8 @@ async function help(ctx) {
 }
 
 async function consumiBotCommand(ctx) {
-	const sender_id = ctx.from.id;
-	const text = ctx.update.message.text;
+	const sender_id = Number(ctx.from.id);
+	const text = String(ctx.update.message.text);
 	
 	const textStringArray = text.split(/(\s+)/).filter(function (e) {
 		return e.trim().length > 0;
@@ -89,27 +92,39 @@ async function consumiBotCommand(ctx) {
 			password: ILIAD_ADMIN_PASSWORD
 		};
 		
-		return await sendResponse(TELEGRAM_ADMIN_ID, credentials);
-	}
-	
-	if (textStringArray.length !== 3) {
-		const msg = `Attenzione, hai sbagliato qualcosa, clicca su /aiuto per avere le istruzioni del bot.`;
+		const msg = `Sciao belo!`;
 		
-		return await bot.telegram.sendMessage(sender, msg)
+		await bot.telegram.sendMessage(TELEGRAM_ADMIN_ID, msg)
 			.then((message) => {
 				const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
 				log(functionName(), false, msg);
 			})
-			.catch((err) => {
+			.catch((err) => async function() {
+				await bot.telegram.sendMessage(TELEGRAM_ADMIN_ID, "Errore di autenticazione, controlla la tua ID e la tua password e riprova.");
 				log(functionName(), true, err);
 			});
+
+		return await sendResponse(TELEGRAM_ADMIN_ID, credentials);
 	} else {
-		const credentials = {
-			user_id: textStringArray[1],
-			password: textStringArray[2]
-		};
-		
-		return await sendResponse(sender_id, credentials);
+		if (textStringArray.length !== 3) {
+			const msg = `Attenzione, hai sbagliato qualcosa, clicca su /aiuto per avere le istruzioni del bot.`;
+			
+			return await bot.telegram.sendMessage(sender_id, msg)
+				.then((message) => {
+					const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
+					log(functionName(), false, msg);
+				})
+				.catch((err) => {
+					log(functionName(), true, err);
+				});
+		} else {
+			const credentials = {
+				user_id: textStringArray[1],
+				password: textStringArray[2]
+			};
+			
+			return await sendResponse(sender_id, credentials);
+		}
 	}
 }
 
@@ -132,7 +147,8 @@ async function sendResponse(sender, credentials) {
 			const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
 			log(functionName(), false, msg);
 		})
-		.catch((err) => {
+		.catch((err) => async function() {
+			await bot.telegram.sendMessage(sender, "Errore di autenticazione, controlla la tua ID e la tua password e riprova.");
 			log(functionName(), true, err);
 		});
 }
@@ -206,131 +222,136 @@ async function getDataFromIliadSite(token) {
 
 async function retrieveDataFromBody(body) {
 	return new Promise((resolve, reject) => {
-		let data_store = {
-			'iliad': {}
-		};
-		
-		let array2 = [];
-		let array3 = [];
-		
-		const $ = cheerio.load(body);
-		let results = $('body');
-		results.each(function (i, result) {
-			$(result)
-				.find('div.conso__content')
-				.each(function (index, element) {
-					array2 = array2.concat([$(element).find('div.conso__text').text().replace(/^\s+|\s+$/gm, '')]);
+		try {
+			let data_store = {
+				'iliad': {}
+			};
+			
+			let array2 = [];
+			let array3 = [];
+			
+			const $ = cheerio.load(body);
+			let results = $('body');
+			results.each(function (i, result) {
+				$(result)
+					.find('div.conso__content')
+					.each(function (index, element) {
+						array2 = array2.concat([$(element).find('div.conso__text').text().replace(/^\s+|\s+$/gm, '')]);
+					});
+				$(result)
+					.find('div.conso__icon')
+					.each(function (index, element) {
+						if ($(element).find('div.wrapper-align').text().replace(/^\s+|\s+$/gm, '').split('\n')[2] !== undefined) {
+							array3 = array3.concat([$(element).find('div.wrapper-align').text().replace(/^\s+|\s+$/gm, '').split('\n')[2]]);
+						} else {
+							array3 = array3.concat([$(element).find('div.wrapper-align').text().replace(/^\s+|\s+$/gm, '')]);
+						}
+					});
+				let title = $(result).find('h2').find('b.red').text().replace(/^\s+|\s+$/gm, '');
+				let title2;
+				$(result).find('div.table-montant').find('div.label').each(function (index, element) {
+					if (index === 1)
+						title2 = $(element).text().replace(/^\s+|\s+$/gm, '')
 				});
-			$(result)
-				.find('div.conso__icon')
-				.each(function (index, element) {
-					if ($(element).find('div.wrapper-align').text().replace(/^\s+|\s+$/gm, '').split('\n')[2] !== undefined) {
-						array3 = array3.concat([$(element).find('div.wrapper-align').text().replace(/^\s+|\s+$/gm, '').split('\n')[2]]);
-					} else {
-						array3 = array3.concat([$(element).find('div.wrapper-align').text().replace(/^\s+|\s+$/gm, '')]);
-					}
-				});
-			let title = $(result).find('h2').find('b.red').text().replace(/^\s+|\s+$/gm, '');
-			let title2;
-			$(result).find('div.table-montant').find('div.label').each(function (index, element) {
-				if (index === 1)
-					title2 = $(element).text().replace(/^\s+|\s+$/gm, '')
+				
+				let title3 = $(result).find('div.end_offerta').text().replace(/^\s+|\s+$/gm, '').match(/\d{2}\/\d{2}\/\d{4}/);
+				
+				data_store["iliad"][0] = {};
+				
+				data_store["iliad"][0][0] = title + '&\n' + title3; //titole credito
+				data_store["iliad"][0][1] = 'true'; //ricarica button
+				data_store["iliad"][0][2] = 'true'; //info consumi button
+				
+				let icon = [
+					"http://android12.altervista.org/res/ic_call.png",
+					"http://android12.altervista.org/res/ic_sms.png",
+					"http://android12.altervista.org/res/ic_gb.png",
+					"http://android12.altervista.org/res/ic_mms.png"
+				];
+				
+				for (let y = 1; y < 5; y++) {
+					let z = y - 1;
+					data_store['iliad'][y] = {};
+					
+					data_store["iliad"][y][0] = array2[z].split('\n')[0]; //tipo
+					data_store["iliad"][y][1] = array2[z].split('\n')[1]; //consumi
+					data_store["iliad"][y][2] = array3[z]; //titoli
+					data_store["iliad"][y][3] = icon[y - 1] //icon
+					
+				}
 			});
 			
-			let title3 = $(result).find('div.end_offerta').text().replace(/^\s+|\s+$/gm, '').match(/\d{2}\/\d{2}\/\d{4}/);
+			const temp1 = data_store["iliad"][0][0].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
 			
-			data_store["iliad"][0] = {};
+			let credito = temp1[0].replace("&", "");
+			let data_rinnovo = temp1[1];
 			
-			data_store["iliad"][0][0] = title + '&\n' + title3; //titole credito
-			data_store["iliad"][0][1] = 'true'; //ricarica button
-			data_store["iliad"][0][2] = 'true'; //info consumi button
-			
-			let icon = [
-				"http://android12.altervista.org/res/ic_call.png",
-				"http://android12.altervista.org/res/ic_sms.png",
-				"http://android12.altervista.org/res/ic_gb.png",
-				"http://android12.altervista.org/res/ic_mms.png"
-			];
-			
-			for (let y = 1; y < 5; y++) {
-				let z = y - 1;
-				data_store['iliad'][y] = {};
-				data_store["iliad"][y][0] = array2[z].split('\n')[0]; //tipo
-				data_store["iliad"][y][1] = array2[z].split('\n')[1]; //consumi
-				data_store["iliad"][y][2] = array3[z]; //titoli
-				data_store["iliad"][y][3] = icon[y - 1] //icon
+			let results_data1 = "\nI tuoi dati iliad (ITALIA):\n";
+			let i = 0;
+			array2.forEach(function (e) {
+				if (i === 4) {
+					results_data1 += "\n\nI tuoi dati iliad (EUROPA):\n";
+				}
 				
-			}
-		});
-		
-		const temp1 = data_store["iliad"][0][0].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		let credito = temp1[0].replace("&", "");
-		let data_rinnovo = temp1[1];
-		
-		let results_data1 = "\nI tuoi dati iliad (ITALIA):\n";
-		let i = 0;
-		array2.forEach(function (e) {
-			if (i === 4) {
-				results_data1 += "\n\nI tuoi dati iliad (EUROPA):\n";
-			}
+				results_data1 += e;
+				results_data1 += "\n-------------------\n";
+				i++;
+			});
 			
-			results_data1 += e;
-			results_data1 += "\n-------------------\n";
-			i++;
-		});
-		
-		const euData = array2[6].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		const chiamateArray = data_store.iliad[1][0].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		const smsArray = data_store.iliad[2][0].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		const mmsArray = data_store.iliad[4][0].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		const datiItArray = data_store.iliad[3][0].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		const datiEuArray = euData[0].split(/(\s+)/).filter(function (e) {
-			return e.trim().length > 0;
-		});
-		
-		resolve({
-			credito: credito,
-			rinnovo: data_rinnovo,
-			chiamate: {
-				usati: `${chiamateArray[1]} ${chiamateArray[2]} ${chiamateArray[3]}`,
-				max: '∞'
-			},
-			messaggi: {
-				usati: `${smsArray[0]}`,
-				max: '∞'
-			},
-			mms: {
-				usati: `${mmsArray[0]}`,
-				max: '∞'
-			},
-			dati_it: {
-				usati: `${datiItArray[0]}`,
-				max: `${datiItArray[2]}`,
-				unit: 'Gb'
-			},
-			dati_eu: {
-				usati: euData[0],
-				max: '2',
-				unit: 'Gb'
-			}
-		});
+			const euData = array2[6].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
+			
+			const chiamateArray = data_store.iliad[1][0].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
+			
+			const smsArray = data_store.iliad[2][0].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
+			
+			const mmsArray = data_store.iliad[4][0].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
+			
+			const datiItArray = data_store.iliad[3][0].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
+			
+			const datiEuArray = euData[0].split(/(\s+)/).filter(function (e) {
+				return e.trim().length > 0;
+			});
+			
+			resolve({
+				credito: credito,
+				rinnovo: data_rinnovo,
+				chiamate: {
+					usati: `${chiamateArray[1]} ${chiamateArray[2]} ${chiamateArray[3]}`,
+					max: '∞'
+				},
+				messaggi: {
+					usati: `${smsArray[0]}`,
+					max: '∞'
+				},
+				mms: {
+					usati: `${mmsArray[0]}`,
+					max: '∞'
+				},
+				dati_it: {
+					usati: `${datiItArray[0]}`,
+					max: `${datiItArray[2]}`,
+					unit: 'Gb'
+				},
+				dati_eu: {
+					usati: euData[0],
+					max: '2',
+					unit: 'Gb'
+				}
+			});
+		} catch (e) {
+			reject(e);
+		}
 	});
 }
