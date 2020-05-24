@@ -4,6 +4,11 @@
 const Telegraf = require('telegraf');
 const request = require('request');
 const cheerio = require('cheerio');
+const result = dotenv.config({ path: './.env'});
+
+if (result.error) {
+	throw result.error;
+}
 
 /** import functions **/
 const log = require('./v2_common').telegramLog;
@@ -14,16 +19,19 @@ const functionName = require('./v2_common').functionName;
 /** import classes **/
 
 /** constants **/
-const telegram_api_token = '552329485:AAGx9xgd-6CfGInHDoRyVHmV1OlSMM21ETc';
+const TELEGRAM_API_TOKEN = process.env.TELEGRAM_API_TOKEN;
 const ILIAD_BASE_URL = 'https://www.iliad.it/account/';
-const TELEGRAM_ADMIN_ID = 9484131;
+const TELEGRAM_ADMIN_ID = process.env.TELEGRAM_ADMIN_ID;
+const ILIAD_ADMIN_ID = process.env.ILIAD_ADMIN_ID;
+const ILIAD_ADMIN_PASSWORD = process.env.TELEGRAM_ADMIN_ID;
+
 const ILIAD_OPTION_URL = {
 	login: 'login',
 	credit: 'consumi-e-credito'
 };
 
 /** Init **/
-const bot = new Telegraf(telegram_api_token);
+const bot = new Telegraf(TELEGRAM_API_TOKEN);
 
 /** Middlewares **/
 bot.use(async (ctx, next) => {
@@ -77,8 +85,8 @@ async function consumiBotCommand(ctx) {
 	
 	if (sender_id === TELEGRAM_ADMIN_ID) {
 		const credentials = {
-			user_id: '74886955',
-			password: 'aLm-q3J-qUo-GCd'
+			user_id: ILIAD_ADMIN_ID,
+			password: ILIAD_ADMIN_PASSWORD
 		};
 		
 		return await sendResponse(TELEGRAM_ADMIN_ID, credentials);
