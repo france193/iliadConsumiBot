@@ -11,10 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "dotenv": "^8.2.0",
     "form-data": "^2.3.2",
     "request": "^2.87.0",
     "restify-clients": "^2.2.0",
     "simple-node-logger": "^0.93.37",
-    "telebot": "^1.2.6"
+    "telebot": "^1.2.6",
+    "telegraf": "^3.38.0"
   }
 }

@@ -160,6 +160,13 @@ async function retrieveData(id, body) {
         }
     });
 
+    const temp1 = data_store["iliad"][0][0].split(/(\s+)/).filter(function (e) {
+        return e.trim().length > 0;
+    });
+
+    let credito = temp1[0].replace("&", "");
+    let data_rinnovo = temp1[1];
+
     let results_data1 = "\nI tuoi dati iliad (ITALIA):\n";
     let i = 0;
     array2.forEach(function (e) {
@@ -176,14 +183,16 @@ async function retrieveData(id, body) {
         return e.trim().length > 0;
     });
 
-    //➡️
 
-    let results_data2 = "<b>iliad - i tuoi consumi</b>\n" +
-        "\n 📞" + data_store.iliad[1][0] + " / ∞" +
-        "\n ✉️ : " + data_store.iliad[2][0] + " / ∞" +
-        "\n 📩 : " + data_store.iliad[4][0] + " / ∞" +
-        "\n 🌐 Dati consumati  (🇮🇹): " + data_store.iliad[3][0] +
-        "\n 🌐 Dati consumati  (🇪🇺): " + euData[0] + " / 2GB";
+    let results_data2 = "<b>La tua linea iliad</b>\n\n" +
+        "➡️<b>Il tuo credito: </b>" + credito + "\n" +
+        "➡️<b>Prossimo rinnovo: </b>" + data_rinnovo + "\n" +
+        "➡️<b>I tuoi consumi</b>" +
+        "\n    📞" + data_store.iliad[1][0] + " / ∞" +
+        "\n    ✉️ : " + data_store.iliad[2][0] + " / ∞" +
+        "\n    📩 : " + data_store.iliad[4][0] + " / ∞" +
+        "\n    🌐 Dati consumati  (🇮🇹): " + data_store.iliad[3][0] +
+        "\n    🌐 Dati consumati  (🇪🇺): " + euData[0] + " / 2GB";
 
     await bot.sendMessage(id, results_data2, {parseMode: 'html'});
 }
