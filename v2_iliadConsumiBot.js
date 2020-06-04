@@ -27,9 +27,9 @@ const ILIAD_BASE_URL = 'https://www.iliad.it/account/';
 const TELEGRAM_ADMIN_ID = Number(process.env.TELEGRAM_ADMIN_ID);
 const ILIAD_ADMIN_ID = String(process.env.ILIAD_ADMIN_ID);
 const ILIAD_ADMIN_PASSWORD = String(process.env.ILIAD_ADMIN_PASSWORD);
-const RITO_TELEGRAM_ID = 491965935;
-const ALESSIA_TELEGRAM_ID = 15072846;
-const FRAKKIO_TELEGRAM_ID = 50046948;
+const RITO_TELEGRAM_ID = String(process.env.RITO_TELEGRAM_ID);
+const ALESSIA_TELEGRAM_ID = String(process.env.ALESSIA_TELEGRAM_ID);
+const FRAKKIO_TELEGRAM_ID = String(process.env.FRAKKIO_TELEGRAM_ID);
 
 const ILIAD_OPTION_URL = {
 	login: 'login',
