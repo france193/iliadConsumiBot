@@ -27,11 +27,23 @@ const ILIAD_BASE_URL = 'https://www.iliad.it/account/';
 const TELEGRAM_ADMIN_ID = Number(process.env.TELEGRAM_ADMIN_ID);
 const ILIAD_ADMIN_ID = String(process.env.ILIAD_ADMIN_ID);
 const ILIAD_ADMIN_PASSWORD = String(process.env.ILIAD_ADMIN_PASSWORD);
+const RITO_TELEGRAM_ID = 491965935;
+const ALESSIA_TELEGRAM_ID = 15072846;
+const FRAKKIO_TELEGRAM_ID = 50046948;
 
 const ILIAD_OPTION_URL = {
 	login: 'login',
 	credit: 'consumi-e-credito'
 };
+
+const RitoGreetings = [
+	"Uè guagliò!",
+	"Vrimm nu poc cumm staj mis...",
+	"Ua staj chin e sord!",
+	"Maronn quant si purucchius...",
+	"A l'anim 'ro puparuol, è scriscitat 'o fatt!",
+	"Si nu purcuoc, agg' cuntrullat mòmò...",
+];
 
 /** Init **/
 const bot = new Telegraf(TELEGRAM_API_TOKEN);
@@ -86,46 +98,88 @@ async function consumiBotCommand(ctx) {
 		return e.trim().length > 0;
 	});
 	
-	if (sender_id === TELEGRAM_ADMIN_ID) {
-		const credentials = {
-			user_id: ILIAD_ADMIN_ID,
-			password: ILIAD_ADMIN_PASSWORD
-		};
+	switch (sender_id) {
+		// case TELEGRAM_ADMIN_ID:
+		// 	return await replyToAdmin();
 		
-		const msg = `Sciao belo!`;
+		case TELEGRAM_ADMIN_ID | RITO_TELEGRAM_ID | ALESSIA_TELEGRAM_ID | FRAKKIO_TELEGRAM_ID:
+			return await replyInNapoletano(ctx, textStringArray, sender_id);
 		
-		await bot.telegram.sendMessage(TELEGRAM_ADMIN_ID, msg)
+		default:
+			return await replyToOthers(textStringArray, sender_id);
+	}
+}
+
+async function replyInNapoletano(ctx, textStringArray, sender_id) {
+	if (textStringArray.length !== 3) {
+		const msg = `Attenzione, hai sbagliato qualcosa, clicca su /aiuto per avere le istruzioni del bot.`;
+		
+		return await bot.telegram.sendMessage(sender_id, msg)
 			.then((message) => {
 				const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
 				log(functionName(), false, msg);
 			})
-			.catch((err) => async function() {
-				await bot.telegram.sendMessage(TELEGRAM_ADMIN_ID, "Errore di autenticazione, controlla la tua ID e la tua password e riprova.");
+			.catch((err) => {
 				log(functionName(), true, err);
 			});
-
-		return await sendResponse(TELEGRAM_ADMIN_ID, credentials);
 	} else {
-		if (textStringArray.length !== 3) {
-			const msg = `Attenzione, hai sbagliato qualcosa, clicca su /aiuto per avere le istruzioni del bot.`;
-			
-			return await bot.telegram.sendMessage(sender_id, msg)
-				.then((message) => {
-					const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
-					log(functionName(), false, msg);
-				})
-				.catch((err) => {
-					log(functionName(), true, err);
-				});
-		} else {
-			const credentials = {
-				user_id: textStringArray[1],
-				password: textStringArray[2]
-			};
-			
+		const credentials = {
+			user_id: textStringArray[1],
+			password: textStringArray[2]
+		};
+		
+		const index = Math.floor(Math.random() * RitoGreetings.length);
+		const msg = RitoGreetings[index];
+		
+		await ctx.telegram.sendMessage(sender_id, msg);
+		
+		setTimeout(async () => {
 			return await sendResponse(sender_id, credentials);
-		}
+		}, 4000)
 	}
+}
+
+async function replyToOthers(textStringArray, sender_id) {
+	if (textStringArray.length !== 3) {
+		const msg = `Attenzione, hai sbagliato qualcosa, clicca su /aiuto per avere le istruzioni del bot.`;
+		
+		return await bot.telegram.sendMessage(sender_id, msg)
+			.then((message) => {
+				const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
+				log(functionName(), false, msg);
+			})
+			.catch((err) => {
+				log(functionName(), true, err);
+			});
+	} else {
+		const credentials = {
+			user_id: textStringArray[1],
+			password: textStringArray[2]
+		};
+		
+		return await sendResponse(sender_id, credentials);
+	}
+}
+
+async function replyToAdmin() {
+	const credentials = {
+		user_id: ILIAD_ADMIN_ID,
+		password: ILIAD_ADMIN_PASSWORD
+	};
+	
+	const msg = `Sciao belo!`;
+	
+	await bot.telegram.sendMessage(TELEGRAM_ADMIN_ID, msg)
+		.then((message) => {
+			const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
+			log(functionName(), false, msg);
+		})
+		.catch((err) => async function () {
+			await bot.telegram.sendMessage(TELEGRAM_ADMIN_ID, "Errore di autenticazione, controlla la tua ID e la tua password e riprova.");
+			log(functionName(), true, err);
+		});
+	
+	return await sendResponse(TELEGRAM_ADMIN_ID, credentials);
 }
 
 async function sendResponse(sender, credentials) {
@@ -147,7 +201,7 @@ async function sendResponse(sender, credentials) {
 			const msg = `Message sent (Telegram message ID: ${message.message_id}).`;
 			log(functionName(), false, msg);
 		})
-		.catch((err) => async function() {
+		.catch((err) => async function () {
 			await bot.telegram.sendMessage(sender, "Errore di autenticazione, controlla la tua ID e la tua password e riprova.");
 			log(functionName(), true, err);
 		});
