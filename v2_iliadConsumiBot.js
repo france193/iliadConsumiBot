@@ -24,12 +24,13 @@ const functionName = require('./v2_common').functionName;
 /** constants **/
 const TELEGRAM_API_TOKEN = String(process.env.TELEGRAM_API_TOKEN);
 const ILIAD_BASE_URL = 'https://www.iliad.it/account/';
-const TELEGRAM_ADMIN_ID = Number(process.env.TELEGRAM_ADMIN_ID);
 const ILIAD_ADMIN_ID = String(process.env.ILIAD_ADMIN_ID);
 const ILIAD_ADMIN_PASSWORD = String(process.env.ILIAD_ADMIN_PASSWORD);
-const RITO_TELEGRAM_ID = String(process.env.RITO_TELEGRAM_ID);
-const ALESSIA_TELEGRAM_ID = String(process.env.ALESSIA_TELEGRAM_ID);
-const FRAKKIO_TELEGRAM_ID = String(process.env.FRAKKIO_TELEGRAM_ID);
+
+const TELEGRAM_ADMIN_ID = Number(process.env.TELEGRAM_ADMIN_ID);
+const RITO_TELEGRAM_ID = Number(process.env.RITO_TELEGRAM_ID);
+const ALESSIA_TELEGRAM_ID = Number(process.env.ALESSIA_TELEGRAM_ID);
+const FRAKKIO_TELEGRAM_ID = Number(process.env.FRAKKIO_TELEGRAM_ID);
 
 const ILIAD_OPTION_URL = {
 	login: 'login',
@@ -98,11 +99,13 @@ async function consumiBotCommand(ctx) {
 		return e.trim().length > 0;
 	});
 	
+	log(functionName(), false, `${typeof sender_id} - ${typeof TELEGRAM_ADMIN_ID}`)
+	
 	switch (sender_id) {
-		// case TELEGRAM_ADMIN_ID:
-		// 	return await replyToAdmin();
-		
-		case TELEGRAM_ADMIN_ID | RITO_TELEGRAM_ID | ALESSIA_TELEGRAM_ID | FRAKKIO_TELEGRAM_ID:
+		case TELEGRAM_ADMIN_ID:
+		case RITO_TELEGRAM_ID:
+		case ALESSIA_TELEGRAM_ID:
+		case FRAKKIO_TELEGRAM_ID:
 			return await replyInNapoletano(ctx, textStringArray, sender_id);
 		
 		default:
