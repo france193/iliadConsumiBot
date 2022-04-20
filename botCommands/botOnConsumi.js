@@ -187,11 +187,11 @@ async function retrieveData(id, body) {
     let results_data2 = "<b>La tua linea iliad</b>\n\n" +
         "➡️<b>Il tuo credito: </b>" + credito + "\n" +
         "➡️<b>Prossimo rinnovo: </b>" + data_rinnovo + "\n" +
-        "➡️<b>I tuoi consumi</b>" +
-        "\n    📞" + data_store.iliad[1][0] + " / ∞" +
-        "\n    ✉️ : " + data_store.iliad[2][0] + " / ∞" +
-        "\n    📩 : " + data_store.iliad[4][0] + " / ∞" +
-        "\n    🌐 Dati consumati  (🇮🇹): " + data_store.iliad[3][0] +
+        "➡️<b>I tuoi consumi di questo mese</b>" +
+        "\n    📞" + data_store.iliad[1][0] + " di chiamate effettuate" +
+        "\n    ✉️ : " + data_store.iliad[2][0] + " SMS" +
+        "\n    📩 : " + data_store.iliad[4][0] + " MMS" +
+        "\n    🌐 Dati consumati (🇮🇹): " + data_store.iliad[3][0] +
         "\n    🌐 Dati consumati  (🇪🇺): " + euData[0] + " / 2GB";
 
     await bot.sendMessage(id, results_data2, {parseMode: 'html'});

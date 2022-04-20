@@ -1,10 +1,10 @@
 'use strict';
 
 /** import functions **/
-const telegramFileLog = require('./v2_logger').telegramFileLog;
-const telegramStdoutLog = require('./v2_logger').telegramStdoutLog;
-const youtubeFileLog = require('./v2_logger').youtubeFileLog;
-const youtubeStdoutLog = require('./v2_logger').youtubeStdoutLog;
+const telegramFileLog = require('./logger').telegramFileLog;
+const telegramStdoutLog = require('./logger').telegramStdoutLog;
+const youtubeFileLog = require('./logger').youtubeFileLog;
+const youtubeStdoutLog = require('./logger').youtubeStdoutLog;
 
 /** settings **/
 const DEBUG = Boolean(true);
